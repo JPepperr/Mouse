@@ -21,8 +21,67 @@ void Graph::BuildGraph(Seria& s) {
     auto it = s.Begin();
     while (it != s.End()) {
         const auto& str = *it;
-        std::cout << str << '\n';
+        for (size_t i = 0; i < str.size() - 1; i++) {
+            AddEdge(str.substr(i, 1), str.substr(i + 1, 1));
+        }
         it = s.NextIt(it);
     }
-    std::cout << "-------------------------------------------------\n";
+}
+
+const std::vector<std::shared_ptr<Node>>& Node::GetEdges() const {
+    return edges_;
+}
+
+uint32_t Node::GetNum() const {
+    return num_;
+}
+
+const std::string& Node::GetName() const {
+    return name_;
+}
+
+std::shared_ptr<Node> Graph::GetNode(uint32_t num) const{
+    return g_[num];
+}
+
+std::vector<uint32_t> DistMatrix::CalcDist(uint32_t num) {
+    std::vector<uint32_t> d(g_->CNT_NODES, -1);
+    std::queue<uint32_t> q;
+    d[num] = 0;
+    q.push(num);
+    while (!q.empty()) {
+        auto v = q.front();
+        q.pop();
+        for (const auto e : g_->GetNode(v)->GetEdges()) {
+            uint32_t to = e->GetNum();
+            if (d[to] == -1) {
+                d[to] = d[v] + 1;
+                q.push(to);
+            }
+        }
+    }
+    return d;
+}
+
+DistMatrix::DistMatrix(const Graph& g) {
+    g_ = std::make_shared<Graph>(g);
+    d_.resize(g.CNT_NODES);
+    for (size_t i = 0; i < d_.size(); i++) {
+        d_[i] = CalcDist(i);
+    }
+}
+
+void DistMatrix::PrintMatrix() const {
+    std::cout << "\t";
+    for (size_t i = 0; i < d_.size(); i++) {
+        std::cout << g_->GetNode(i)->GetName() << '\t';
+    }
+    std::cout << '\n';
+    for (size_t i = 0; i < d_.size(); i++) {
+        std::cout << g_->GetNode(i)->GetName() << '\t';
+        for (auto j : d_[i]) {
+            std::cout << j << '\t';
+        }
+        std::cout << '\n';
+    }
 }

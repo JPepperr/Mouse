@@ -40,7 +40,7 @@ public:
         void SetSession(Session::Iterator it);
     private:
         std::vector<std::shared_ptr<Session>>::iterator it_;
-        Session::Iterator session_it_;    
+        Session::Iterator session_it_;
     };
     Iterator NextIt(Iterator cur);
     Iterator Begin();
@@ -59,12 +59,12 @@ public:
     public:
         Iterator(std::map<std::string, std::shared_ptr<Mouse>>::iterator it, Mouse::Iterator mouse_it);
         std::string& operator*();
-        bool operator!=(const Seria::Iterator& other) const; 
+        bool operator!=(const Seria::Iterator& other) const;
         std::map<std::string, std::shared_ptr<Mouse>>::iterator Get();
         Mouse::Iterator GetMouse();
     private:
         std::map<std::string, std::shared_ptr<Mouse>>::iterator it_;
-        Mouse::Iterator mouse_it_;   
+        Mouse::Iterator mouse_it_;
     };
     Iterator NextIt(Seria::Iterator cur);
     Iterator Begin();
