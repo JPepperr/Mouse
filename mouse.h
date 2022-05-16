@@ -22,6 +22,7 @@ public:
     Iterator End();
     Iterator Begin();
     void AddTrial(const std::string& trial);
+    const std::vector<std::string>& GetTrials();
 private:
     std::vector<std::string> trials_;
 };
@@ -48,6 +49,7 @@ public:
     Mouse(const std::string& name);
     void AddSession();
     void AddTrialToLastSession(const std::string& s);
+    const std::vector<std::shared_ptr<Session>>& GetSessions();
 private:
     std::string name_;
     std::vector<std::shared_ptr<Session>> sessions_;
@@ -72,6 +74,7 @@ public:
     Seria(const std::string& name);
     void AddMouse(const std::string& name);
     void AddData(const std::string& mouse, uint32_t s_num, uint32_t t_num, const std::string& trial, bool add);
+    const std::map<std::string, std::shared_ptr<Mouse>>& GetMice();
 private:
     std::string name_;
     std::map<std::string, std::shared_ptr<Mouse>> mice_;

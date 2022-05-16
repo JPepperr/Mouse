@@ -168,3 +168,15 @@ Mouse::Iterator Seria::Iterator::GetMouse() {
 std::map<std::string, std::shared_ptr<Mouse>>::iterator Seria::Iterator::Get() {
     return it_;
 }
+
+const std::map<std::string, std::shared_ptr<Mouse>>& Seria::GetMice() {
+    return mice_;
+}
+
+const std::vector<std::shared_ptr<Session>>& Mouse::GetSessions() {
+    return sessions_;
+}
+
+const std::vector<std::string>& Session::GetTrials() {
+    return trials_;
+}

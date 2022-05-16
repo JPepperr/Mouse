@@ -72,7 +72,7 @@ DistMatrix::DistMatrix(const Graph& g) {
 }
 
 void DistMatrix::PrintMatrix() const {
-    std::cout << "\t";
+    std::cout << "\t";  
     for (size_t i = 0; i < d_.size(); i++) {
         std::cout << g_->GetNode(i)->GetName() << '\t';
     }
