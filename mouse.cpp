@@ -180,3 +180,7 @@ const std::vector<std::shared_ptr<Session>>& Mouse::GetSessions() {
 const std::vector<std::string>& Session::GetTrials() {
     return trials_;
 }
+
+const std::string& Mouse::GetName() const {
+    return name_;
+}

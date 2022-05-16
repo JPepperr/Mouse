@@ -6,8 +6,13 @@
 #include <string>
 #include <optional>
 #include <utility>
+#include <vector>
+#include <map>
 #include <math.h>
 #include "mouse.h"
+
+static const int CNT_FEEDERS = 2;
+static const char FEEDERS[CNT_FEEDERS] = {'P', 'D'};
 
 class Result {
 public:
@@ -33,5 +38,19 @@ public:
 Result GetCompressions(Seria& s);
 
 std::optional<std::string> TryToFindPath(const std::string& s, const std::string& b, size_t pos);
+
+class LenStat{
+public:
+    class Path{
+    public:
+        Path() = default;
+        Path(const std::string& p);
+        uint32_t len_[4];
+    };
+    void AddMouse(std::shared_ptr<Mouse> m);
+private:
+    std::map<std::string, std::vector<Path>> data_;
+    std::vector<std::vector<Path>> trials_data_;
+};
 
 #endif

@@ -29,11 +29,9 @@ void Result::AddMouseAnalysis(std::shared_ptr<Mouse> m) {
         const auto& t = s->GetTrials();
         for (size_t i = 1; i < t.size(); i++) {
             for (size_t j = 2; j < t[i].size() - 1; j++) {
-                for (size_t prev = i - 1; prev < i; prev++) {
-                    auto opt = TryToFindPath(t[prev], t[i], j);
-                    if (opt.has_value()) {
-                        res_.push_back({m, opt.value(), false});
-                    }
+                auto opt = TryToFindPath(t[i - 1], t[i], j);
+                if (opt.has_value()) {
+                    res_.push_back({m, opt.value(), false});
                 }
             }
         }
@@ -46,4 +44,35 @@ Result GetCompressions(Seria& s) {
         res.AddMouseAnalysis(m.second);
     }
     return res;
+}
+
+LenStat::Path::Path(const std::string& p) {
+    bool visited[2] = {false, false};
+    size_t last = 0;
+    size_t id = 0;
+    for (size_t i = 0; i < p.size(); i++) {
+        for (size_t num = 0; num < CNT_FEEDERS; num++) {
+            if (p[i] == FEEDERS[num] && !visited[num]) {
+                visited[num] = true;
+                len_[id++] = i - last + 1;
+                last = i;
+            }
+        }
+    }
+    len_[id] = p.size() - last;
+}
+
+void LenStat::AddMouse(std::shared_ptr<Mouse> m) {
+    const auto& curname = m->GetName();
+    for (const auto& s : m->GetSessions()) {
+        auto trs = s->GetTrials();
+        if (trs.size() > trials_data_.size()) {
+            trials_data_.resize(trs.size());
+        }
+        for (size_t t = 0; t < trs.size(); t++) {
+            auto curp = Path(trs[t]);
+            trials_data_[t].push_back(curp);
+            data_[curname].emplace_back(curp);
+        }
+    }
 }

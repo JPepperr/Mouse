@@ -50,6 +50,7 @@ public:
     void AddSession();
     void AddTrialToLastSession(const std::string& s);
     const std::vector<std::shared_ptr<Session>>& GetSessions();
+    const std::string& GetName() const;
 private:
     std::string name_;
     std::vector<std::shared_ptr<Session>> sessions_;

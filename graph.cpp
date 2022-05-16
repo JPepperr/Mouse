@@ -21,6 +21,7 @@ void Graph::BuildGraph(Seria& s) {
     auto it = s.Begin();
     while (it != s.End()) {
         const auto& str = *it;
+        std::cout << '\n';
         for (size_t i = 0; i < str.size() - 1; i++) {
             AddEdge(str.substr(i, 1), str.substr(i + 1, 1));
         }
