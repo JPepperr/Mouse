@@ -16,3 +16,13 @@ void Graph::AddEdge(const std::string& from, const std::string& to) {
     uint32_t to_v = dict_[to];
     g_[from_v]->AddEdge(g_[to_v]);
 }
+
+void Graph::BuildGraph(Seria& s) {
+    auto it = s.Begin();
+    while (it != s.End()) {
+        const auto& str = *it;
+        std::cout << str << '\n';
+        it = s.NextIt(it);
+    }
+    std::cout << "-------------------------------------------------\n";
+}

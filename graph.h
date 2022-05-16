@@ -5,6 +5,7 @@
 #include <string>
 #include <memory>
 #include <map>
+#include "mouse.h"
 
 class Node {
 public:
@@ -22,6 +23,7 @@ public:
     inline static uint32_t CNT_NODES = 0;
     void AddEdge(const std::string& from, const std::string& to);
     void AddNode(const std::string& name);
+    void BuildGraph(Seria& s);
 private:
     std::map<std::string, uint32_t> dict_;
     std::vector<std::shared_ptr<Node>> g_;
