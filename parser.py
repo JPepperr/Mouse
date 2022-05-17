@@ -22,7 +22,7 @@ def get_ascii(x):
 
 cnt = 0
 for row in ws.values:
-    if ((row[1] == 'F1-24') or (row[1] == 'I-hpc')):
+    if ((row[1] == 'F1-24' and row[3] == 1) or (row[1] == 'I-hpc' and row[3] == 1)):
         cur = list([str(x) for x in row][1:6])
         cur[4] = get_ascii(cur[4])
         f.write('\t'.join(cur) + '\n')
