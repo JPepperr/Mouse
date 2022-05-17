@@ -47,7 +47,7 @@ class LenStat{
 public:
     class Path{
     public:
-        Path() = default;
+        Path();
         Path(const std::string& p);
         uint32_t len_[CNT_OF_PARTS];
         size_t cnt_;
@@ -77,5 +77,9 @@ struct SorterByPart{
 uint32_t GetCntFeedersFound(const LenStat& s, uint32_t cnt);
 
 void PrintTableFeedersFound(Seria& s);
+
+std::vector<std::pair<uint32_t, double>> GetAvgOnTrial(LenStat& stat);
+
+std::vector<std::pair<uint32_t, uint32_t>> GetMedOnTrial(LenStat& stat);
 
 #endif
