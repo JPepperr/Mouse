@@ -19,7 +19,7 @@ CompressionsData::CompressionsData(Seria& s) {
 
 void CompressionsData::PathAnalysis(const std::string& from, const std::string& to, std::vector<Stat>& stat) {
     bool visited[2] = {false, false};
-    size_t pos[2] = {from.size(), from.size()};
+    size_t pos[3] = { from.size(), from.size(), from.size() };
     size_t id = 0;
     for (size_t i = 0; i < from.size(); i++) {
         for (size_t num = 0; num < CNT_FEEDERS; num++) {
@@ -28,37 +28,34 @@ void CompressionsData::PathAnalysis(const std::string& from, const std::string& 
                 pos[id++] = i;
             }
         }
-    }    
-    for (size_t i = 0; i < pos[0]; i++) {
-        for (size_t j = i + MIN_COMPRESSION_SIZE - 1; j < std::min(pos[0], MAX_COMPRESSION_SIZE + i - 1); j++) {
-            TryFindCompression(i, j, from, to, stat);
-        }
     }
-    for (size_t i = pos[0]; i < pos[1]; i++) {
-        for (size_t j = i + MIN_COMPRESSION_SIZE - 1; j < std::min(pos[1], MAX_COMPRESSION_SIZE + i - 1); j++) {
-            TryFindCompression(i, j, from, to, stat);
-        }
-    }
-    for (size_t i = pos[1]; i < from.size(); i++) {
-        for (size_t j = i + MIN_COMPRESSION_SIZE - 1; j < std::min(from.size(), MAX_COMPRESSION_SIZE + i - 1); j++) {
-            TryFindCompression(i, j, from, to, stat);
-        }
+    for (size_t k = 0; k < CNT_OF_PARTS; k++) {
+        size_t i = 0;
+        if (k > 0) i = pos[k - 1];
+        for (; i < pos[k]; i++) {
+            for (size_t j = i + MIN_COMPRESSION_SIZE - 1; j < std::min(pos[k], MAX_COMPRESSION_SIZE + i - 1); j++) {
+                if (TryFindCompression(i, j, from, to, stat)) break;
+            }
+        }    
     }
 }
 
-void CompressionsData::TryFindCompression(size_t fr, size_t to, const std::string& b, const std::string& s, std::vector<Stat>& stat) {
+bool CompressionsData::TryFindCompression(size_t fr, size_t to, const std::string& b, const std::string& s, std::vector<Stat>& stat) {
     size_t len = to - fr + 1;
+    bool fl = false;
     for (size_t i = 0; i < s.size(); i++) {
         if (s[i] == b[fr]) {
             for (size_t j = i; j < std::min(s.size(), i + len - 1); j++) {
                 if (s[j] == b[to]) {
                     stat.emplace_back(Stat{ b.substr(fr, len), s.substr(i, j - i + 1), d_.GetDist(std::string(1, s[i]), std::string(1, s[j]))});
+                    fl = true;
                     i = j;
                     break;
                 }   
             }
         }
     }
+    return fl;
 }
 
 void CompressionsData::Stat::Print() const {

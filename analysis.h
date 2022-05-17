@@ -36,7 +36,7 @@ public:
     void Print() const;
     std::vector<std::pair<uint32_t, double>> GetCompressionCoord() const;
 private:
-    void TryFindCompression(size_t fr, size_t to, const std::string& b, const std::string& s, std::vector<Stat>& stat);
+    bool TryFindCompression(size_t fr, size_t to, const std::string& b, const std::string& s, std::vector<Stat>& stat);
     void PathAnalysis(const std::string& from, const std::string& to, std::vector<Stat>& stat);
     std::map<std::string, std::vector<Stat>> data_;
     DistMatrix d_;
