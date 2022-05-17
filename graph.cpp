@@ -85,3 +85,11 @@ void DistMatrix::PrintMatrix() const {
         std::cout << '\n';
     }
 }
+
+uint32_t Graph::GetNum(const std::string& name) {
+    return dict_[name];
+}
+
+uint32_t DistMatrix::GetDist(const std::string& from, const std::string& to) const {
+    return d_[g_->GetNum(from)][g_->GetNum(to)];
+}
