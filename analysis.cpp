@@ -59,7 +59,7 @@ LenStat::Path::Path(const std::string& p) {
             }
         }
     }
-    if (id == CNT_OF_PARTS - 1) len_[id++] = p.size() - last;
+    if (id == CNT_OF_PARTS - 1) len_[id] = p.size() - last;
     cnt_ = id;
     //std::cout << cnt_ << ' ' << len_[0] << ' ' << len_[1] << ' ' << len_[2] << '\n';
 }
@@ -132,7 +132,7 @@ std::vector<std::pair<uint32_t, double>> GetAvgOnPart(LenStat& stat, size_t part
         res[i].first = i + 1;
         uint32_t sum = 0, cnt = 0;
         for (size_t j = 0; j < data[i].size(); j++) {
-            if (data[i][j].cnt_ > part) {
+            if (data[i][j].cnt_ > part || (data[i][j].cnt_ == part && part == CNT_OF_PARTS - 1)) {
                 sum += data[i][j].len_[part];
                 cnt += 1;
             }
@@ -148,7 +148,7 @@ std::vector<std::pair<uint32_t, uint32_t>> GetMedOnPart(LenStat& stat, size_t pa
     for (size_t i = 0; i < res.size(); i++) {
         std::vector<LenStat::Path> curd;
         for (size_t j = 0; j < data[i].size(); j++) {
-            if (data[i][j].cnt_ > part) {
+            if (data[i][j].cnt_ > part || (data[i][j].cnt_ == part && part == CNT_OF_PARTS - 1)) {
                 curd.push_back(data[i][j]);
             }
         }
@@ -165,4 +165,40 @@ std::vector<std::pair<uint32_t, uint32_t>> GetMedOnPart(LenStat& stat, size_t pa
 
 bool SorterByPart::operator()(LenStat::Path a, LenStat::Path b) {
     return a.len_[part_] < b.len_[part_];
+}
+
+const std::map<std::string, std::vector<LenStat::Path>>& LenStat::GetData() const {
+    return data_;
+}
+
+uint32_t GetCntFeedersFound(const LenStat& s, uint32_t cnt) {
+    const auto& data = s.GetData();
+    uint32_t res = 0;
+    for (const auto& d : data) {
+        for (const auto& t : d.second) {
+            if (t.cnt_ == cnt) {
+                res++;
+            }
+        }
+    }
+    return res;
+}
+
+void PrintTableFeedersFound(Seria& s) {
+    LenStat s_stat(s);
+    std::cout << "-----------------------------------------------------------------\n";
+    std::cout << "Feeders found\t|\t0\t|\t1\t|\t2\t|\n";
+    std::cout << "-----------------------------------------------------------------\n";
+    auto r0 = GetCntFeedersFound(s, 0);
+    auto r1 = GetCntFeedersFound(s, 1);
+    auto r2 = GetCntFeedersFound(s, 2);
+    auto sm = r0 + r1 + r2;
+    std::cout << s.GetName() << "\t\t" << "|\t" << r0 << "\t|\t" << r1 << "\t|\t" << r2 << "\t|\n";
+    std::cout << "-----------------------------------------------------------------\n";
+    std::cout << std::fixed << std::setprecision(2);
+    double s0 = double(r0) / double(sm);
+    double s1 = double(r1) / double(sm);
+    double s2 = double(r2) / double(sm);
+    std::cout << s.GetName() << ",%" << "\t\t" << "|\t" << s0 << "\t|\t" << s1 << "\t|\t" << s2 << "\t|\n";
+    std::cout << "-----------------------------------------------------------------\n";
 }

@@ -11,6 +11,7 @@
 #include <map>
 #include <math.h>
 #include <algorithm>
+#include <iomanip>
 #include "mouse.h"
 
 static const int CNT_FEEDERS = 2;
@@ -55,6 +56,7 @@ public:
     LenStat(Seria& s);
     void AddMouse(std::shared_ptr<Mouse> m);
     const std::vector<std::vector<Path>>& GetTrialsData() const;
+    const std::map<std::string, std::vector<Path>>& GetData() const;
 private:
     std::map<std::string, std::vector<Path>> data_;
     std::vector<std::vector<Path>> trials_data_;
@@ -71,5 +73,9 @@ struct SorterByPart{
     size_t part_ = 0;
     bool operator()(LenStat::Path a, LenStat::Path b);
 };
+
+uint32_t GetCntFeedersFound(const LenStat& s, uint32_t cnt);
+
+void PrintTableFeedersFound(Seria& s);
 
 #endif

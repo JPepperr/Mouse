@@ -20,4 +20,6 @@ int main() {
     //r2.Print();
     //std::cout << double(r2.res_.size()) / double(h.GetMice().size()) << '\n';
     BuildPlotData(f, h);
+    PrintTableFeedersFound(f);
+    PrintTableFeedersFound(h);
 }
