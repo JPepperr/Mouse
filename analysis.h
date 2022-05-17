@@ -27,12 +27,14 @@ public:
     public:
         Stat(const std::string& was, const std::string& became, uint32_t len);
         void Print() const;
+        uint32_t GetDelta() const;
     private:
         std::string was_, became_;
         uint32_t best_len_;
     };
     CompressionsData(Seria& s);
     void Print() const;
+    std::vector<std::pair<uint32_t, double>> GetCompressionCoord() const;
 private:
     void TryFindCompression(size_t fr, size_t to, const std::string& b, const std::string& s, std::vector<Stat>& stat);
     void PathAnalysis(const std::string& from, const std::string& to, std::vector<Stat>& stat);

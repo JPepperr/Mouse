@@ -178,8 +178,44 @@ void BuildPlotData(Seria& f, Seria& h) {
         for (const auto& pr : h_coord) {
             file << pr.first << ' ' << pr.second << '\n';
         }
-        file.close();
     }
+    CompressionsData f_data(f);
+    CompressionsData h_data(h);
+    {
+        file << "Compression_ratio ";
+        file << "Compression_ratio Average_quantity ";
+        file << f.GetName() << ' ' << h.GetName() << ' ';
+        auto f_coord = f_data.GetCompressionCoord();
+        auto h_coord = h_data.GetCompressionCoord();
+        file << f_coord.size() << ' ' << h_coord.size() << '\n';
+        for (const auto& pr : f_coord) {
+            file << pr.first << ' ' << pr.second << '\n';
+        }
+        for (const auto& pr : h_coord) {
+            file << pr.first << ' ' << pr.second << '\n';
+        }
+    }
+    file.close();
+}
+
+uint32_t CompressionsData::Stat::GetDelta() const {
+    return was_.size() - became_.size();
+}
+
+std::vector<std::pair<uint32_t, double>> CompressionsData::GetCompressionCoord() const {
+    std::map<uint32_t, uint32_t> cnt;
+    size_t sz = 0;
+    for (const auto& m : data_) {
+        for (const auto& s : m.second) {
+            cnt[s.GetDelta()]++;
+            sz++;
+        }
+    }
+    std::vector<std::pair<uint32_t, double>> res;
+    for (const auto& d : cnt) {
+        res.push_back({ d.first, double(d.second) / double(sz) });
+    }
+    return res;
 }
 
 const std::vector<std::vector<LenStat::Path>>& LenStat::GetTrialsData() const {

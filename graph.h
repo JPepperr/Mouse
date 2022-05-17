@@ -23,7 +23,7 @@ private:
 
 class Graph {
 public:
-    inline static uint32_t CNT_NODES = 0;
+    uint32_t CNT_NODES = 0;
     void AddEdge(const std::string& from, const std::string& to);
     void AddNode(const std::string& name);
     void BuildGraph(Seria& s);
