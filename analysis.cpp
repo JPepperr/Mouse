@@ -46,7 +46,13 @@ Result GetCompressions(Seria& s) {
     return res;
 }
 
+LenStat::Path::Path() : cnt_(0) {
+    std::fill(len_, len_ + CNT_OF_PARTS, 0);
+}
+
 LenStat::Path::Path(const std::string& p) {
+    std::fill(len_, len_ + CNT_OF_PARTS, 0);
+    cnt_ = 0;
     bool visited[2] = {false, false};
     size_t last = 0;
     size_t id = 0;
@@ -61,7 +67,6 @@ LenStat::Path::Path(const std::string& p) {
     }
     if (id == CNT_OF_PARTS - 1) len_[id] = p.size() - last;
     cnt_ = id;
-    //std::cout << cnt_ << ' ' << len_[0] << ' ' << len_[1] << ' ' << len_[2] << '\n';
 }
 
 void LenStat::AddMouse(std::shared_ptr<Mouse> m) {
@@ -118,7 +123,35 @@ void BuildPlotData(Seria& f, Seria& h) {
             file << pr.first << ' ' << pr.second << '\n';
         }
     }
-    file.close();
+    {
+        file << "Average_path_length ";
+        file << "Trial Length ";
+        file << f.GetName() << ' ' << h.GetName() << ' ';
+        auto f_coord = GetAvgOnTrial(f_stat);
+        auto h_coord = GetAvgOnTrial(h_stat);
+        file << f_coord.size() << ' ' << h_coord.size() << '\n';
+        for (const auto& pr : f_coord) {
+            file << pr.first << ' ' << pr.second << '\n';
+        }
+        for (const auto& pr : h_coord) {
+            file << pr.first << ' ' << pr.second << '\n';
+        }
+    }
+    {
+        file << "Median_path_length ";
+        file << "Trial Length ";
+        file << f.GetName() << ' ' << h.GetName() << ' ';
+        auto f_coord = GetMedOnTrial(f_stat);
+        auto h_coord = GetMedOnTrial(h_stat);
+        file << f_coord.size() << ' ' << h_coord.size() << '\n';
+        for (const auto& pr : f_coord) {
+            file << pr.first << ' ' << pr.second << '\n';
+        }
+        for (const auto& pr : h_coord) {
+            file << pr.first << ' ' << pr.second << '\n';
+        }
+        file.close();
+    }
 }
 
 const std::vector<std::vector<LenStat::Path>>& LenStat::GetTrialsData() const {
@@ -195,10 +228,51 @@ void PrintTableFeedersFound(Seria& s) {
     auto sm = r0 + r1 + r2;
     std::cout << s.GetName() << "\t\t" << "|\t" << r0 << "\t|\t" << r1 << "\t|\t" << r2 << "\t|\n";
     std::cout << "-----------------------------------------------------------------\n";
-    std::cout << std::fixed << std::setprecision(2);
-    double s0 = double(r0) / double(sm);
-    double s1 = double(r1) / double(sm);
-    double s2 = double(r2) / double(sm);
+    uint32_t s0 = double(r0) / double(sm) * double(100);
+    uint32_t s1 = double(r1) / double(sm) * double(100);
+    uint32_t s2 = double(r2) / double(sm) * double(100);
     std::cout << s.GetName() << ",%" << "\t\t" << "|\t" << s0 << "\t|\t" << s1 << "\t|\t" << s2 << "\t|\n";
     std::cout << "-----------------------------------------------------------------\n";
+}
+
+std::vector<std::pair<uint32_t, double>> GetAvgOnTrial(LenStat& stat) {
+    const auto& data = stat.GetTrialsData();
+    std::vector<std::pair<uint32_t, double>> res(data.size());
+    for (size_t i = 0; i < res.size(); i++) {
+        res[i].first = i + 1;
+        uint32_t sum = 0, cnt = 0;
+        for (size_t j = 0; j < data[i].size(); j++) {
+            for (size_t part = 0; part < CNT_OF_PARTS; part++) {
+                sum += data[i][j].len_[part];
+                if (data[i][j].len_[part] > 0 && part > 0) sum--;
+            }
+            cnt += 1;
+        }
+        res[i].second = double(sum) / double(cnt);
+    }
+    return res;
+}
+
+std::vector<std::pair<uint32_t, uint32_t>> GetMedOnTrial(LenStat& stat) {
+    const auto& data = stat.GetTrialsData();
+    std::vector<std::pair<uint32_t, uint32_t>> res(data.size());
+    for (size_t i = 0; i < res.size(); i++) {
+        std::vector<uint32_t> curd;
+        for (size_t j = 0; j < data[i].size(); j++) {
+            uint32_t sum = 0;
+            for (size_t part = 0; part < CNT_OF_PARTS; part++) {
+                sum += data[i][j].len_[part];
+                if (data[i][j].len_[part] > 0 && part > 0) sum--;
+            }
+            curd.push_back(sum);
+        }
+        sort(curd.begin(), curd.end());
+        res[i].first = i + 1;
+        if (curd.size() == 0) {
+            res[i].second = 0;
+        } else {
+            res[i].second = curd[curd.size() / 2];
+        }
+    }
+    return res;
 }
