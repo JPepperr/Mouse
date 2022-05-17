@@ -41,20 +41,37 @@ void CompressionsData::PathAnalysis(const std::string& from, const std::string& 
 }
 
 bool CompressionsData::TryFindCompression(size_t fr, size_t to, const std::string& b, const std::string& s, std::vector<Stat>& stat) {
+    // if (b[fr] == b[to]) return false;
     size_t len = to - fr + 1;
     bool fl = false;
+    size_t best_len = -1;
+    std::pair<size_t, size_t> ans;
     for (size_t i = 0; i < s.size(); i++) {
         if (s[i] == b[fr]) {
             for (size_t j = i; j < std::min(s.size(), i + len - 1); j++) {
+            // for (size_t j = i; j < i + 1; j++) {
+                bool nxt = true;
+                if (to < b.size() - 1 && j < s.size() - 1 && b[to + 1] != s[j + 1]) nxt = false;
                 if (s[j] == b[to]) {
-                    stat.emplace_back(Stat{ b.substr(fr, len), s.substr(i, j - i + 1), d_.GetDist(std::string(1, s[i]), std::string(1, s[j]))});
+                    // if (j - i + 1 < best_len) {
+                    //     best_len = j - i + 1;
+                    //     ans = {i, j};
+                    // }
+                    ans = {i, j};
+                    stat.emplace_back(Stat{ b.substr(fr, len), 
+                        s.substr(ans.first, ans.second - ans.first + 1), 
+                        d_.GetDist(std::string(1, s[ans.first]), std::string(1, s[ans.second]))});
                     fl = true;
-                    i = j;
                     break;
                 }   
             }
         }
     }
+    // if (fl) {
+    //     stat.emplace_back(Stat{ b.substr(fr, len), 
+    //         s.substr(ans.first, ans.second - ans.first + 1), 
+    //         d_.GetDist(std::string(1, s[ans.first]), std::string(1, s[ans.second]))});
+    // }
     return fl;
 }
 
@@ -177,6 +194,7 @@ void BuildPlotData(Seria& f, Seria& h) {
         }
     }
     CompressionsData f_data(f);
+    f_data.Print();
     CompressionsData h_data(h);
     {
         file << "Compression_ratio ";
@@ -208,10 +226,13 @@ std::vector<std::pair<uint32_t, double>> CompressionsData::GetCompressionCoord()
             sz++;
         }
     }
+    std::cout << "--------------\n";
     std::vector<std::pair<uint32_t, double>> res;
     for (const auto& d : cnt) {
         res.push_back({ d.first, double(d.second) / double(sz) });
+        std::cout << d.second << '\n';
     }
+    std::cout << "--------------\n";
     return res;
 }
 
