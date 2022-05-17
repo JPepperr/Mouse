@@ -1,12 +1,72 @@
-C xa ya l1 l2 2 3
-1 5
-2 6
-2 2
-4 1
-6 7
-D xa ya l1 l2 2 3
-1 5
-2 6
-2 2
-4 1
-6 7
+Average_path_length_on_part_1 Trial Length F1-24 I-hpc 6 5
+1 9
+2 10.5714
+3 7.5
+4 10.125
+5 12
+6 5
+1 5.8
+2 8
+3 5.25
+4 12.3333
+5 13
+Average_path_length_on_part_2 Trial Length F1-24 I-hpc 6 5
+1 15
+2 23.5556
+3 8
+4 12.3333
+5 20
+6 4
+1 11.4
+2 17
+3 12
+4 13.5
+5 -nan
+Average_path_length_on_part_3 Trial Length F1-24 I-hpc 6 5
+1 57.7143
+2 21
+3 35.1111
+4 21.6667
+5 51
+6 40
+1 29.4
+2 17.8
+3 29.5
+4 21.5
+5 -nan
+Median_path_length_on_part_1 Trial Length F1-24 I-hpc 6 5
+1 4
+2 10
+3 5
+4 9
+5 4
+6 5
+1 4
+2 4
+3 4
+4 15
+5 13
+Median_path_length_on_part_2 Trial Length F1-24 I-hpc 6 5
+1 14
+2 19
+3 7
+4 8
+5 34
+6 4
+1 6
+2 11
+3 16
+4 16
+5 0
+Median_path_length_on_part_3 Trial Length F1-24 I-hpc 6 5
+1 62
+2 18
+3 33
+4 25
+5 61
+6 40
+1 13
+2 13
+3 30
+4 38
+5 0

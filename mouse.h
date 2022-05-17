@@ -76,6 +76,7 @@ public:
     void AddMouse(const std::string& name);
     void AddData(const std::string& mouse, uint32_t s_num, uint32_t t_num, const std::string& trial, bool add);
     const std::map<std::string, std::shared_ptr<Mouse>>& GetMice();
+    const std::string& GetName() const;
 private:
     std::string name_;
     std::map<std::string, std::shared_ptr<Mouse>> mice_;

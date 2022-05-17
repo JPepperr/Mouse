@@ -1,4 +1,5 @@
 import matplotlib
+from matplotlib import markers
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import os
@@ -16,8 +17,8 @@ for line in file:
     cur = line.strip()
     if (cnt1 == 0 and cnt2 == 0):
         if (cnt > 0):
-            plt.plot(x1, y1, label=lab1)
-            plt.plot(x2, y2, label=lab2)
+            plt.plot(x1, y1, label=lab1, marker='o')
+            plt.plot(x2, y2, label=lab2, marker='o')
             plt.xlabel(xlab)
             plt.ylabel(ylab)
             plt.title(title)
@@ -36,8 +37,8 @@ for line in file:
         cnt1 = int(c1)
         cnt2 = int(c2)
     else:
-        curx = int(cur.split(' ')[0])
-        cury = int(cur.split(' ')[1])
+        curx = float(cur.split(' ')[0])
+        cury = float(cur.split(' ')[1])
         if (cnt1 > 0):
             cnt1 -= 1
             x1.append(curx)
@@ -48,8 +49,8 @@ for line in file:
             y2.append(cury)
 
 if (cnt > 0):
-    plt.plot(x1, y1, label=lab1)
-    plt.plot(x2, y2, label=lab2)
+    plt.plot(x1, y1, label=lab1, marker='o')
+    plt.plot(x2, y2, label=lab2, marker='o')
     plt.xlabel(xlab)
     plt.ylabel(ylab)
     plt.title(title)

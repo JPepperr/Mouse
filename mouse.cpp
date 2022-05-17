@@ -184,3 +184,7 @@ const std::vector<std::string>& Session::GetTrials() {
 const std::string& Mouse::GetName() const {
     return name_;
 }
+
+const std::string& Seria::GetName() const {
+    return name_;
+}

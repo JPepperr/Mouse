@@ -19,5 +19,5 @@ int main() {
     //auto r2 = GetCompressions(h);
     //r2.Print();
     //std::cout << double(r2.res_.size()) / double(h.GetMice().size()) << '\n';
-    
+    BuildPlotData(f, h);
 }

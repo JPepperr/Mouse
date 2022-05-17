@@ -59,7 +59,9 @@ LenStat::Path::Path(const std::string& p) {
             }
         }
     }
-    len_[id] = p.size() - last;
+    if (id == CNT_OF_PARTS - 1) len_[id++] = p.size() - last;
+    cnt_ = id;
+    //std::cout << cnt_ << ' ' << len_[0] << ' ' << len_[1] << ' ' << len_[2] << '\n';
 }
 
 void LenStat::AddMouse(std::shared_ptr<Mouse> m) {
@@ -75,4 +77,92 @@ void LenStat::AddMouse(std::shared_ptr<Mouse> m) {
             data_[curname].emplace_back(curp);
         }
     }
+}
+
+LenStat::LenStat(Seria& s) {
+    for (auto& m : s.GetMice()) {
+        AddMouse(m.second);
+    }
+}
+
+void BuildPlotData(Seria& f, Seria& h) {
+    LenStat f_stat(f);
+    LenStat h_stat(h);
+    std::ofstream file;
+    file.open("plot_data.txt");
+    for (size_t part = 0; part < CNT_OF_PARTS; part++) {
+        file << "Average_path_length_on_part_" << part + 1 << ' ';
+        file << "Trial Length ";
+        file << f.GetName() << ' ' << h.GetName() << ' ';
+        auto f_coord = GetAvgOnPart(f_stat, part);
+        auto h_coord = GetAvgOnPart(h_stat, part);
+        file << f_coord.size() << ' ' << h_coord.size() << '\n';
+        for (const auto& pr : f_coord) {
+            file << pr.first << ' ' << pr.second << '\n';
+        }
+        for (const auto& pr : h_coord) {
+            file << pr.first << ' ' << pr.second << '\n';
+        }
+    }
+    for (size_t part = 0; part < CNT_OF_PARTS; part++) {
+        file << "Median_path_length_on_part_" << part + 1 << ' ';
+        file << "Trial Length ";
+        file << f.GetName() << ' ' << h.GetName() << ' ';
+        auto f_coord = GetMedOnPart(f_stat, part);
+        auto h_coord = GetMedOnPart(h_stat, part);
+        file << f_coord.size() << ' ' << h_coord.size() << '\n';
+        for (const auto& pr : f_coord) {
+            file << pr.first << ' ' << pr.second << '\n';
+        }
+        for (const auto& pr : h_coord) {
+            file << pr.first << ' ' << pr.second << '\n';
+        }
+    }
+    file.close();
+}
+
+const std::vector<std::vector<LenStat::Path>>& LenStat::GetTrialsData() const {
+    return trials_data_;
+}
+
+std::vector<std::pair<uint32_t, double>> GetAvgOnPart(LenStat& stat, size_t part) {
+    const auto& data = stat.GetTrialsData();
+    std::vector<std::pair<uint32_t, double>> res(data.size());
+    for (size_t i = 0; i < res.size(); i++) {
+        res[i].first = i + 1;
+        uint32_t sum = 0, cnt = 0;
+        for (size_t j = 0; j < data[i].size(); j++) {
+            if (data[i][j].cnt_ > part) {
+                sum += data[i][j].len_[part];
+                cnt += 1;
+            }
+        }
+        res[i].second = double(sum) / double(cnt);
+    }
+    return res;
+}
+
+std::vector<std::pair<uint32_t, uint32_t>> GetMedOnPart(LenStat& stat, size_t part) {
+    const auto& data = stat.GetTrialsData();
+    std::vector<std::pair<uint32_t, uint32_t>> res(data.size());
+    for (size_t i = 0; i < res.size(); i++) {
+        std::vector<LenStat::Path> curd;
+        for (size_t j = 0; j < data[i].size(); j++) {
+            if (data[i][j].cnt_ > part) {
+                curd.push_back(data[i][j]);
+            }
+        }
+        sort(curd.begin(), curd.end(), SorterByPart(part));
+        res[i].first = i + 1;
+        if (curd.size() == 0) {
+            res[i].second = 0;
+        } else {
+            res[i].second = curd[curd.size() / 2].len_[part];
+        }
+    }
+    return res;
+}
+
+bool SorterByPart::operator()(LenStat::Path a, LenStat::Path b) {
+    return a.len_[part_] < b.len_[part_];
 }

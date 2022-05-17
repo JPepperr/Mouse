@@ -2,6 +2,7 @@
 #define ANALYSIS_H
 
 #include <iostream>
+#include <fstream>
 #include <memory>
 #include <string>
 #include <optional>
@@ -9,10 +10,12 @@
 #include <vector>
 #include <map>
 #include <math.h>
+#include <algorithm>
 #include "mouse.h"
 
 static const int CNT_FEEDERS = 2;
 static const char FEEDERS[CNT_FEEDERS] = {'P', 'D'};
+static const size_t CNT_OF_PARTS = 3;
 
 class Result {
 public:
@@ -45,12 +48,28 @@ public:
     public:
         Path() = default;
         Path(const std::string& p);
-        uint32_t len_[4];
+        uint32_t len_[CNT_OF_PARTS];
+        size_t cnt_;
     };
+    LenStat() = default;
+    LenStat(Seria& s);
     void AddMouse(std::shared_ptr<Mouse> m);
+    const std::vector<std::vector<Path>>& GetTrialsData() const;
 private:
     std::map<std::string, std::vector<Path>> data_;
     std::vector<std::vector<Path>> trials_data_;
+};
+
+void BuildPlotData(Seria& f, Seria& h);
+
+std::vector<std::pair<uint32_t, double>> GetAvgOnPart(LenStat& stat, size_t part);
+
+std::vector<std::pair<uint32_t, uint32_t>> GetMedOnPart(LenStat& stat, size_t part);
+
+struct SorterByPart{
+    SorterByPart(size_t part):part_(part){}
+    size_t part_ = 0;
+    bool operator()(LenStat::Path a, LenStat::Path b);
 };
 
 #endif
