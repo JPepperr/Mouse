@@ -13,35 +13,34 @@
 #include <algorithm>
 #include <iomanip>
 #include "mouse.h"
+#include "graph.h"
 
 static const int CNT_FEEDERS = 2;
 static const char FEEDERS[CNT_FEEDERS] = {'P', 'D'};
 static const size_t CNT_OF_PARTS = 3;
+static const size_t MIN_COMPRESSION_SIZE = 4;
+static const size_t MAX_COMPRESSION_SIZE = 14;
 
-class Result {
+class CompressionsData {
 public:
     class Stat {
     public:
-        Stat() = default;
-        Stat(std::shared_ptr<Mouse> mouse, std::string path, bool best);
-    // private:
-        std::shared_ptr<Mouse> mouse_;
-        std::string path_;
-        bool best_;
+        Stat(const std::string& was, const std::string& became, uint32_t len);
+        void Print() const;
+        uint32_t GetDelta() const;
+    private:
+        std::string was_, became_;
+        uint32_t best_len_;
     };
-    void AddMouseAnalysis(std::shared_ptr<Mouse> m);
-    void Print() {
-        for (size_t i = 0; i < res_.size(); i++) {
-            std::cout << res_[i].path_.size() << '\t' << res_[i].path_ << '\n';
-        }
-    }
-// private:
-    std::vector<Stat> res_;
+    CompressionsData(Seria& s);
+    void Print() const;
+    std::vector<std::pair<uint32_t, double>> GetCompressionCoord() const;
+private:
+    void TryFindCompression(size_t fr, size_t to, const std::string& b, const std::string& s, std::vector<Stat>& stat);
+    void PathAnalysis(const std::string& from, const std::string& to, std::vector<Stat>& stat);
+    std::map<std::string, std::vector<Stat>> data_;
+    DistMatrix d_;
 };
-
-Result GetCompressions(Seria& s);
-
-std::optional<std::string> TryToFindPath(const std::string& s, const std::string& b, size_t pos);
 
 class LenStat{
 public:

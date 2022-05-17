@@ -11,14 +11,18 @@ for f in os.listdir(dir):
 cnt = 0
 cnt1 = 0
 cnt2 = 0
+need1 = False
+need2 = False
 
 file = open('plot_data.txt', 'rt')
 for line in file:
     cur = line.strip()
     if (cnt1 == 0 and cnt2 == 0):
         if (cnt > 0):
-            plt.plot(x1, y1, label=lab1, marker='o')
-            plt.plot(x2, y2, label=lab2, marker='o')
+            if (need1 == True):
+                plt.plot(x1, y1, label=lab1, marker='o')
+            if (need2 == True):
+                plt.plot(x2, y2, label=lab2, marker='o')
             plt.xlabel(xlab)
             plt.ylabel(ylab)
             plt.title(title)
@@ -36,6 +40,14 @@ for line in file:
         title, xlab, ylab, lab1, lab2, c1, c2 = cur.split(' ')
         cnt1 = int(c1)
         cnt2 = int(c2)
+        if cnt1 > 0:
+            need1 = True
+        else:
+            need1 = False
+        if cnt2 > 0:
+            need2 = True
+        else:
+            need2 = False
     else:
         curx = float(cur.split(' ')[0])
         cury = float(cur.split(' ')[1])
@@ -49,8 +61,10 @@ for line in file:
             y2.append(cury)
 
 if (cnt > 0):
-    plt.plot(x1, y1, label=lab1, marker='o')
-    plt.plot(x2, y2, label=lab2, marker='o')
+    if (need1 == True):
+        plt.plot(x1, y1, label=lab1, marker='o')
+    if (need2 == True):
+        plt.plot(x2, y2, label=lab2, marker='o')
     plt.xlabel(xlab)
     plt.ylabel(ylab)
     plt.title(title)

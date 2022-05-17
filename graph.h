@@ -23,11 +23,12 @@ private:
 
 class Graph {
 public:
-    inline static uint32_t CNT_NODES = 0;
+    uint32_t CNT_NODES = 0;
     void AddEdge(const std::string& from, const std::string& to);
     void AddNode(const std::string& name);
     void BuildGraph(Seria& s);
     std::shared_ptr<Node> GetNode(uint32_t num) const;
+    uint32_t GetNum(const std::string& name);
 private:
     std::map<std::string, uint32_t> dict_;
     std::vector<std::shared_ptr<Node>> g_;
@@ -35,9 +36,11 @@ private:
 
 class DistMatrix {
 public:
+    DistMatrix() = default;
     DistMatrix(const Graph& g);
     std::vector<uint32_t> CalcDist(uint32_t num);
     void PrintMatrix() const;
+    uint32_t GetDist(const std::string& from, const std::string& to) const;
 private:
     std::shared_ptr<Graph> g_;
     std::vector<std::vector<uint32_t>> d_;

@@ -1,49 +1,77 @@
 #include "analysis.h"
 
-Result::Stat::Stat(std::shared_ptr<Mouse> mouse, std::string path, bool best): mouse_(mouse), path_(std::move(path)), best_(best) {}
+CompressionsData::Stat::Stat(const std::string& was, const std::string& became, uint32_t len) : was_(was), became_(became), best_len_(len) {}
 
-std::optional<std::string> TryToFindPath(const std::string& s, const std::string& b, size_t pos) {
-    size_t ans = 200;
-    std::pair<size_t, size_t> ans_pos;
-    for (size_t i = 1; i < s.size(); i++) {
-        if (s[i] == b[pos - 1] && s[i - 1] == b[pos - 2]) {
-            for (size_t j = i + 1; j < s.size() - 1; j++) {
-                if (s[j] == b[pos] && s[j + 1] == b[pos + 1]) {
-                    size_t del = abs((int32_t)pos - (int32_t)j);
-                    if (del < ans && j - i < 10 && j > i + 2) {
-                        ans = del;
-                        ans_pos = {i, j};
-                    }
+CompressionsData::CompressionsData(Seria& s) {
+    std::shared_ptr<Graph> g = std::make_shared<Graph>();
+    g->BuildGraph(s);
+    d_ = DistMatrix(*g);
+    for (const auto& m : s.GetMice()) {
+        const auto& curname = m.first;
+        for (const auto& session : m.second->GetSessions()) {
+            const auto& trials = session->GetTrials();
+            for (size_t i = 1; i < trials.size(); i++) {
+                PathAnalysis(trials[i - 1], trials[i], data_[curname]);
+            }
+        }
+    }
+}
+
+void CompressionsData::PathAnalysis(const std::string& from, const std::string& to, std::vector<Stat>& stat) {
+    bool visited[2] = {false, false};
+    size_t pos[2] = {from.size(), from.size()};
+    size_t id = 0;
+    for (size_t i = 0; i < from.size(); i++) {
+        for (size_t num = 0; num < CNT_FEEDERS; num++) {
+            if (from[i] == FEEDERS[num] && !visited[num]) {
+                visited[num] = true;
+                pos[id++] = i;
+            }
+        }
+    }    
+    for (size_t i = 0; i < pos[0]; i++) {
+        for (size_t j = i + MIN_COMPRESSION_SIZE - 1; j < std::min(pos[0], MAX_COMPRESSION_SIZE + i - 1); j++) {
+            TryFindCompression(i, j, from, to, stat);
+        }
+    }
+    for (size_t i = pos[0]; i < pos[1]; i++) {
+        for (size_t j = i + MIN_COMPRESSION_SIZE - 1; j < std::min(pos[1], MAX_COMPRESSION_SIZE + i - 1); j++) {
+            TryFindCompression(i, j, from, to, stat);
+        }
+    }
+    for (size_t i = pos[1]; i < from.size(); i++) {
+        for (size_t j = i + MIN_COMPRESSION_SIZE - 1; j < std::min(from.size(), MAX_COMPRESSION_SIZE + i - 1); j++) {
+            TryFindCompression(i, j, from, to, stat);
+        }
+    }
+}
+
+void CompressionsData::TryFindCompression(size_t fr, size_t to, const std::string& b, const std::string& s, std::vector<Stat>& stat) {
+    size_t len = to - fr + 1;
+    for (size_t i = 0; i < s.size(); i++) {
+        if (s[i] == b[fr]) {
+            for (size_t j = i; j < std::min(s.size(), i + len - 1); j++) {
+                if (s[j] == b[to]) {
+                    stat.emplace_back(Stat{ b.substr(fr, len), s.substr(i, j - i + 1), d_.GetDist(std::string(1, s[i]), std::string(1, s[j]))});
                     i = j;
                     break;
-                }
-            }
-        }
-    }
-    if (ans == 200) return std::nullopt;
-    return s.substr(ans_pos.first, ans_pos.second - ans_pos.first + 1);
-}
-
-void Result::AddMouseAnalysis(std::shared_ptr<Mouse> m) {
-    for (const auto& s : m->GetSessions()) {
-        const auto& t = s->GetTrials();
-        for (size_t i = 1; i < t.size(); i++) {
-            for (size_t j = 2; j < t[i].size() - 1; j++) {
-                auto opt = TryToFindPath(t[i - 1], t[i], j);
-                if (opt.has_value()) {
-                    res_.push_back({m, opt.value(), false});
-                }
+                }   
             }
         }
     }
 }
 
-Result GetCompressions(Seria& s) {
-    Result res;
-    for (const auto& m : s.GetMice()) {
-        res.AddMouseAnalysis(m.second);
+void CompressionsData::Stat::Print() const {
+    std::cout << was_ << " | " << became_ << " | " << best_len_ << '\n';
+}
+
+void CompressionsData::Print() const {
+    for (const auto& p : data_) {
+        std::cout << p.first << '\n';
+        for (const auto& d : p.second) {
+            d.Print();
+        }
     }
-    return res;
 }
 
 LenStat::Path::Path() : cnt_(0) {
@@ -150,8 +178,44 @@ void BuildPlotData(Seria& f, Seria& h) {
         for (const auto& pr : h_coord) {
             file << pr.first << ' ' << pr.second << '\n';
         }
-        file.close();
     }
+    CompressionsData f_data(f);
+    CompressionsData h_data(h);
+    {
+        file << "Compression_ratio ";
+        file << "Compression_ratio Average_quantity ";
+        file << f.GetName() << ' ' << h.GetName() << ' ';
+        auto f_coord = f_data.GetCompressionCoord();
+        auto h_coord = h_data.GetCompressionCoord();
+        file << f_coord.size() << ' ' << h_coord.size() << '\n';
+        for (const auto& pr : f_coord) {
+            file << pr.first << ' ' << pr.second << '\n';
+        }
+        for (const auto& pr : h_coord) {
+            file << pr.first << ' ' << pr.second << '\n';
+        }
+    }
+    file.close();
+}
+
+uint32_t CompressionsData::Stat::GetDelta() const {
+    return was_.size() - became_.size();
+}
+
+std::vector<std::pair<uint32_t, double>> CompressionsData::GetCompressionCoord() const {
+    std::map<uint32_t, uint32_t> cnt;
+    size_t sz = 0;
+    for (const auto& m : data_) {
+        for (const auto& s : m.second) {
+            cnt[s.GetDelta()]++;
+            sz++;
+        }
+    }
+    std::vector<std::pair<uint32_t, double>> res;
+    for (const auto& d : cnt) {
+        res.push_back({ d.first, double(d.second) / double(sz) });
+    }
+    return res;
 }
 
 const std::vector<std::vector<LenStat::Path>>& LenStat::GetTrialsData() const {
